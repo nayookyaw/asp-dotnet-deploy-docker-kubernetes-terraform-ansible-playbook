@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp-web
-  namespace: myapp
+  namespace: {{k8s_namespace}}
   labels:
     app: myapp-web
 spec:
@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: myapp-web
-          image: myapp-web:latest
+          image: {{ image_name }}
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5151
           env:
@@ -30,7 +31,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: myapp-web
-  namespace: myapp
+  namespace: {{k8s_namespace}}
 spec:
   selector:
     app: myapp-web

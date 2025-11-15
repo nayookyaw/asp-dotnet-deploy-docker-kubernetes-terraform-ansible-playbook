@@ -1,6 +1,7 @@
 ---
-kind_cluster_name: "myapp"
-image_tar_local: "../myapp-web.tar"              # where the tar is on Windows
-image_tar_remote: "/home/{{ ansible_user }}/myapp-web.tar"
+kind_cluster_name: "myapp-kind-cluster"
+image_tar_file: "myapp-web.tar"            # where the tar is on Windows
+backend_remote_path: "/DEPLOY_1/backend"
 image_name: "myapp-web:latest"
-k8s_remote_path: "/home/{{ ansible_user }}/k8s-manifests"
+k8s_remote_path: "/DEPLOY_1/k8s-manifests"
+k8s_namespace: "myapp-namespace"

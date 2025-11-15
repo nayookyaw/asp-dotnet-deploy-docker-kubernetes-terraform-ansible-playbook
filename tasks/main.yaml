@@ -1,5 +1,5 @@
 ---
-- include_tasks : install-setup.yaml
-- include_tasks : kind-cluster.yaml
+# - include_tasks : install-setup.yaml
+# - include_tasks : kind-cluster.yaml
 - include_tasks : backend-aspdotnet.yaml
 - include_tasks : k8s-setup.yaml

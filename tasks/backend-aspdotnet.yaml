@@ -2,22 +2,26 @@
 # COPY Docker tar file from local to remote/server
 # =========================================================
 ---
+- name: Load shared variables
+  include_vars:
+    file: ../vars/main.yaml
+    
 - name: Ensure folder created
   file:
-    path: /DEPLOY_1/backend/webapps
+    path: "{{backend_remote_path}}"
     state: directory
   become: true
 
 - name: Ensure folder created
   file:
-    path: /DEPLOY_1/backend/logs
+    path: "{{ backend_remote_path }}/logs"
     state: directory
   become: true
 
 - name: Ensure backend file copied
   copy:
     src: data/backend/
-    dest: /DEPLOY_1/backend/
+    dest: "{{backend_remote_path}}/"
   become: true
 
 # =========================================================
@@ -25,7 +29,7 @@
 # =========================================================
 
 - name: Load Docker image from tar file
-  shell: docker load -i {{ image_tar_file }}
+  shell: docker load -i "{{ backend_remote_path }}/{{ image_tar_file }}"
 
 - name: Load Docker image into kind cluster
-  shell: kind load docker-image {{ image_name }} --name {{ kind_cluster_name }}
+  shell: kind load docker-image "{{ image_name }}" --name "{{ kind_cluster_name }}"
