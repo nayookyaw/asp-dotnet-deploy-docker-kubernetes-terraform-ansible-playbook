@@ -2,12 +2,27 @@
 # Create kind cluster
 # =========================================================
 ---
+- name: Load shared variables
+  include_vars:
+    file: ../vars/main.yaml
+
 - name: Check if kind cluster exists
   shell: kind get clusters
   register: kind_clusters
   failed_when: false
   changed_when: false
 
+- debug:
+    msg:
+      - "kind_cluster_name = {{ kind_cluster_name | default('UNDEFINED') }}"
+      - "existing clusters = {{ kind_clusters.stdout.split() }}"
+
+- name: Copy kind config to remote
+  copy:
+    src: k8s/kind-config.yaml
+    dest: "{{ k8s_remote_path }}/kind-config.yaml"
+  become: true
+
 - name: Create kind cluster
-  shell: kind create cluster --name {{ kind_cluster_name }}
+  shell: kind create cluster --name {{ kind_cluster_name }} --config {{ k8s_remote_path }}/kind-config.yaml
   when: kind_clusters.stdout is defined and kind_cluster_name | default('') not in kind_clusters.stdout
