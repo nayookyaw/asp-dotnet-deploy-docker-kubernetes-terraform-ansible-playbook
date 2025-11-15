@@ -1,0 +1,33 @@
+# ================================
+# 4. Copy Kubernetes YAMLs & apply
+# ================================
+- name: Create k8s manifests directory on Ubuntu
+  file:
+    path: "{{ k8s_remote_path }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Copy k8s manifests to Ubuntu
+  copy:
+    src: "../k8s/"
+    dest: "{{ k8s_remote_path }}/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Apply namespace
+  shell: kubectl apply -f namespace.yaml
+  args:
+    chdir: "{{ k8s_remote_path }}"
+
+- name: Apply MSSQL deployment + service
+  shell: kubectl apply -f mssql.yaml
+  args:
+    chdir: "{{ k8s_remote_path }}"
+
+- name: Apply ASP.NET Core deployment + service
+  shell: kubectl apply -f myapp-web.yaml
+  args:
+    chdir: "{{ k8s_remote_path }}"

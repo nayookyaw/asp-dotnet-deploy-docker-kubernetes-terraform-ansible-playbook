@@ -1,0 +1,13 @@
+# =========================================================
+# 2. Create kind cluster
+# =========================================================
+---
+- name: Check if kind cluster exists
+  shell: kind get clusters
+  register: kind_clusters
+  failed_when: false
+  changed_when: false
+
+- name: Create kind cluster
+  shell: kind create cluster --name {{ kind_cluster_name }}
+  when: "'{{ kind_cluster_name }}' not in kind_clusters.stdout"

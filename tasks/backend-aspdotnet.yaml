@@ -1,0 +1,31 @@
+# =========================================================
+# COPY Docker tar file from local to remote/server
+# =========================================================
+---
+- name: Ensure folder created
+  file:
+    path: /DEPLOY_1/backend/webapps
+    state: directory
+  become: true
+
+- name: Ensure folder created
+  file:
+    path: /DEPLOY_1/backend/logs
+    state: directory
+  become: true
+
+- name: Ensure backend file copied
+  copy:
+    src: data/backend/
+    dest: /DEPLOY_1/backend/
+  become: true
+
+# =========================================================
+# Load local Docker image tar file into Docker + kind
+# =========================================================
+
+- name: Load Docker image from tar file
+  shell: docker load -i {{ image_tar_file }}
+
+- name: Load Docker image into kind cluster
+  shell: kind load docker-image {{ image_name }} --name {{ kind_cluster_name }}

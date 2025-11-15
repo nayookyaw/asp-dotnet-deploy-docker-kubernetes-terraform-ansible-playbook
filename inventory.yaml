@@ -1,0 +1,11 @@
+virtualmachines:
+  hosts:
+    vm01:
+      ansible_host: 192.168.68.63
+      keepalived_priority: 101
+      keepalived_bind_interface: enp2s0
+      ansible_user: nay
+      ansible_password: 1234
+      ansible_become_password: 1234
+      ansible_port: 22
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

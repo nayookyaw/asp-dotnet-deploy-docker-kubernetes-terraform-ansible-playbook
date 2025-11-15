@@ -1,0 +1,28 @@
+---
+- name: Ensure folder created
+  file:
+    path: /DCHT/frontend
+    state: directory
+  become: true
+
+- name: Ensure frontend file copied
+  copy:
+    src: data/frontend/
+    dest: /DCHT/frontend/
+  become: true
+
+- name: Remove old image
+  command: chdir=/DCHT/frontend docker image rm hw_tracking_front -f
+  become: true
+
+- name: docker load image
+  command: chdir=/DCHT/frontend docker load -i hw_tracking_front
+  become: true
+
+- name: docker compose down
+  command: chdir=/DCHT/frontend docker compose down
+  become: true
+
+- name: docker compose up
+  command: chdir=/DCHT/frontend docker compose up -d
+  become: true

@@ -1,0 +1,59 @@
+# =========================================================
+# 1. Install Docker, kubectl, kind, Terraform
+# =========================================================
+---
+- hosts: ubuntu
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
+        update_cache: yes
+        state: present
+
+    - name: Install Docker
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Add user to Docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Install kubectl
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        mv kubectl /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Install kind
+      shell: |
+        curl -Lo /usr/local/bin/kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
+        chmod +x /usr/local/bin/kind
+      args:
+        creates: /usr/local/bin/kind
+
+    - name: Install Terraform
+      shell: |
+        wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp.gpg
+        echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main" > /etc/apt/sources.list.d/hashicorp.list
+        apt update
+        apt install terraform -y
+      args:
+        creates: /usr/bin/terraform
+    
+    - name: Verify installations
+      shell: |
+        docker --version
+        kubectl version --client
+        kind --version
+        terraform version

@@ -1,0 +1,6 @@
+---
+kind_cluster_name: "myapp"
+image_tar_local: "../myapp-web.tar"              # where the tar is on Windows
+image_tar_remote: "/home/{{ ansible_user }}/myapp-web.tar"
+image_name: "myapp-web:latest"
+k8s_remote_path: "/home/{{ ansible_user }}/k8s-manifests"

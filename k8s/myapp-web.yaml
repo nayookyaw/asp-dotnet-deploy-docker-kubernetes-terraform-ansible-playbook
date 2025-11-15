@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-web
+  namespace: myapp
+  labels:
+    app: myapp-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp-web
+  template:
+    metadata:
+      labels:
+        app: myapp-web
+    spec:
+      containers:
+        - name: myapp-web
+          image: myapp-web:latest
+          ports:
+            - containerPort: 5151
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:5151"
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server=ms-sql-docker-app,1433;Database=YourDbName;User Id=sa;Password=Your_password123!;TrustServerCertificate=True;"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-web
+  namespace: myapp
+spec:
+  selector:
+    app: myapp-web
+  ports:
+    - port: 80
+      targetPort: 5151
+      nodePort: 30080
+  type: NodePort
