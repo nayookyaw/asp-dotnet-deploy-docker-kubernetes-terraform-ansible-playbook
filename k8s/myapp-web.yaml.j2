@@ -6,7 +6,12 @@ metadata:
   labels:
     app: myapp-web
 spec:
-  replicas: 1
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0     # never reduce below 3 ready pods
+      maxSurge: 1           # add 1 extra pod at a time
   selector:
     matchLabels:
       app: myapp-web
@@ -26,6 +31,35 @@ spec:
               value: "http://+:5151"
             - name: ConnectionStrings__Default
               value: "Server=ms-sql-docker-app,1433;Database=YourDbName;User Id=sa;Password=Your_password123!;TrustServerCertificate=True;"
+          
+          # 🔹 Optional: startup probe (for slow boot / migrations)
+          startupProbe:
+            httpGet:
+              path: /api/health/live       # or /healthz if you prefer
+              port: 5151
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30       # 30 * 5s = 150s max startup
+
+          # 🔹 Liveness: is the process alive?
+          livenessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: 5151
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # 🔹 Readiness: can it handle traffic? (CPU/queue/DB etc)
+          readinessProbe:
+            httpGet:
+              path: /api/health/live
+              port: 5151
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -38,5 +72,4 @@ spec:
   ports:
     - port: 80
       targetPort: 5151
-      nodePort: 30080
-  type: NodePort
+  type: ClusterIP

@@ -76,3 +76,17 @@
   shell: kubectl apply -f myapp-web.yaml
   args:
     chdir: "{{ k8s_remote_path }}"
+
+- name: Render ingress myapp web template
+  template:
+    src: ../k8s/myapp-web-ingress.yaml.j2
+    dest: "{{ k8s_remote_path }}/myapp-ingress.yaml"
+  become: true
+
+- name: Restart deployment to pick up new image
+  shell: kubectl rollout restart deployment/myapp-web -n {{ k8s_namespace }}
+  args:
+    chdir: "{{ k8s_remote_path }}"
+
+- name: Apply ingress
+  shell: kubectl apply -f "{{ k8s_remote_path }}/myapp-ingress.yaml"

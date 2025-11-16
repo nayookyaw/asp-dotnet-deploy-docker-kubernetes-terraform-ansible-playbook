@@ -1,0 +1,47 @@
+---
+- name: Ensure ingress namespace exists
+  shell: |
+    kubectl get namespace ingress || kubectl create namespace ingress
+  register: ns_cmd
+  changed_when: "'created' in ns_cmd.stdout"
+  become: false                         # run as ansible_user, not root
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Add HAProxy Helm repo if not present
+  shell: |
+    helm repo list | grep -q '^haproxytech' || \
+    helm repo add haproxytech https://haproxytech.github.io/helm-charts
+  changed_when: false
+  become: false
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Helm repo update
+  shell: helm repo update
+  changed_when: false
+  become: false
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Check if haproxy-ingress release exists
+  shell: |
+    helm list -n ingress -q | grep -w haproxy-ingress || true
+  register: haproxy_release
+  changed_when: false
+  become: false
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Install or upgrade HAProxy Ingress
+  shell: |
+    helm upgrade --install haproxy-ingress haproxytech/kubernetes-ingress \
+      --namespace ingress \
+      --set controller.kind=Deployment \
+      --set controller.replicaCount=2 \
+      --set controller.service.type=NodePort \
+      --set controller.service.nodePorts.http=30080 \
+      --set controller.service.nodePorts.https=30443 \
+  become: false
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
