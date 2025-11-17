@@ -27,6 +27,14 @@ spec:
           ports:
             - containerPort: 5151
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: ASPNETCORE_URLS
               value: "http://+:5151"
             - name: ConnectionStrings__Default
